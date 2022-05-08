@@ -1,72 +1,59 @@
-import { StyleSheet, TextInput,FlatList, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import { StyleSheet, TextInput, FlatList, TouchableOpacity, ActivityIndicator, Image, Animated } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import EditScreenInfo from '../components/EditScreenInfo';
 import { Text, View } from '../components/Themed';
-import { RootTabScreenProps } from '../types';
+import { RootTabScreenProps, Card } from '../types';
 import PopCard from '../components/PopCard'
-
-const Card = (title:any)=>(
-  <View>
-    <Text>{title}</Text>
-  </View>
-)
 
 export default function TabOneScreen({ navigation }: RootTabScreenProps<'TabOne'>) {
 
-  const [search,onChangeSearch]= useState('')
-  const [data,setData]= useState([])
-  
+  const [search, onChangeSearch] = useState<string>('')
+  const [data, setData] = useState<Card[]>([])
 
-  const fetchPopInfo=()=> {
-    fetch(`https://api.scryfall.com/cards/search?order=cmc&q=${search}`,{
+
+  const fetchPopInfo = () => {
+    fetch(`https://api.scryfall.com/cards/search?order=cmc&q=${search}`, {
       method: 'GET',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json'
       },
-    }).then((response)=>response.json())
-    .then((json)=>{
-      setData(json.data)
-      console.log(json.data)
-    })
-    .catch((error)=>(error))   
-    
+    }).then((response) => response.json())
+      .then((json) => {
+        setData(json.data)
+      })
+      .catch((error) => (error))
+
   };
 
-
-  const renderItem=(item:any)=>(
-    <Card title={item.name}/>
-  )
-
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const ITEM_SIZE = 300 + 25 * 3
   return (
     <View style={styles.container}>
-      {data.length===0?(<ActivityIndicator/>)
-      : (<FlatList
-        data={data}
-        keyExtractor= {({id},index)=> id}
-        renderItem={({item})=>{
-          return(
-            <View>
-              <Text>{item.name}</Text>
-              {item.image_uris ? 
-              (<Image style={styles.imageField} source={{
-                uri: item.image_uris.normal 
-                }}/>):
-                (<Image style={styles.imageField} source={{
-                  uri:'http://pixelartmaker-data-78746291193.nyc3.digitaloceanspaces.com/image/62eeb29ff34ccea.png'
-                  }}/>)
-              }
-              
-            </View>
-          )
-        }}
+      {data.length === 0 ? (<ActivityIndicator />)
+        : (<FlatList
+          data={data}
+          keyExtractor={item => item.id}
+          contentContainerStyle={{
+            padding: 25
+          }}
+          renderItem={({ item, index }) => {
+            return (
+              <View>
+                <Text>{item.name}</Text>
+                <Image style={styles.imageField} source={{
+                  uri: item.image_uris === undefined ? 'http://pixelartmaker-data-78746291193.nyc3.digitaloceanspaces.com/image/62eeb29ff34ccea.png' : item.image_uris.art_crop
+                }} />
+              </View>
+            )
+          }}
         />)}
-      
+
 
       <Text style={styles.title}>Search</Text>
-      <TextInput onChangeText={text=>onChangeSearch(text)} value={search} style={styles.inputField} placeholder="swag money ballin"></TextInput>
+      <TextInput onChangeText={text => onChangeSearch(text)} value={search} style={styles.inputField} placeholder="swag money ballin"></TextInput>
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-     
+
       <TouchableOpacity onPress={fetchPopInfo}>
         <Text>Submit</Text>
       </TouchableOpacity>
@@ -75,11 +62,11 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'TabOne'
 }
 
 const styles = StyleSheet.create({
-  imageField:{
-    width:488,
-    height:680
+  imageField: {
+    height: 200,
+    resizeMode: 'contain'
   },
-  inputField:{
+  inputField: {
     color: 'white',
     borderWidth: 2,
     height: 30,
