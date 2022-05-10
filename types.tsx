@@ -33,3 +33,17 @@ export type RootTabScreenProps<Screen extends keyof RootTabParamList> = Composit
   BottomTabScreenProps<RootTabParamList, Screen>,
   NativeStackScreenProps<RootStackParamList>
 >;
+
+export type Card = {
+  id: string,
+  name: string,
+  released_at: string,
+  uri: string,
+  image_uris: {
+    small: string,
+    normal: string,
+    large: string,
+    art_crop: string,
+    border_crop: string,
+  }
+}
